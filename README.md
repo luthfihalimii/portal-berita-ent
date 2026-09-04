@@ -41,11 +41,8 @@ mudah dijelaskan saat proses validasi.
   Tailwind CSS   Styling dan responsive UI
   Vite           Asset bundling dan frontend development
   Eloquent ORM   Interaksi dengan database
-  SQLite         Database development
+  MySQL          Database utama / development
   Git            Version control
-
-> Database dapat diganti ke MySQL atau PostgreSQL melalui konfigurasi
-> `.env` jika diperlukan.
 
 ## Requirement
 
@@ -53,7 +50,8 @@ Pastikan environment sudah memiliki:
 
 -   PHP 8.3+
 -   Composer
--   Node.js dan NPM
+-   MySQL Database Server
+-   Bun
 -   Git
 
 Untuk memastikan requirement tersedia:
@@ -61,8 +59,8 @@ Untuk memastikan requirement tersedia:
 ``` bash
 php -v
 composer -V
-node -v
-npm -v
+mysql --version
+bun -v
 git --version
 ```
 
@@ -105,24 +103,16 @@ php artisan key:generate
 
 ### 5. Konfigurasi database
 
-Secara default project dapat menggunakan SQLite.
-
-Pastikan file database tersedia:
-
-``` text
-database/database.sqlite
-```
-
-Kemudian pastikan `.env` menggunakan konfigurasi database yang sesuai.
-
-Contoh:
+Pastikan database MySQL sudah dibuat, kemudian sesuaikan konfigurasi pada file `.env`:
 
 ``` env
-DB_CONNECTION=sqlite
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=portal_berita
+DB_USERNAME=root
+DB_PASSWORD=
 ```
-
-Jika menggunakan MySQL/PostgreSQL, ubah konfigurasi database di `.env`
-sesuai environment masing-masing.
 
 **Jangan commit file `.env` ke repository.**
 
@@ -138,13 +128,13 @@ kategori, dan berita contoh.
 ### 7. Install dependency frontend
 
 ``` bash
-npm install
+bun install
 ```
 
 ### 8. Build asset
 
 ``` bash
-npm run build
+bun run build
 ```
 
 ### 9. Jalankan aplikasi
@@ -167,11 +157,10 @@ Untuk development, jalankan:
 composer run dev
 ```
 
-Jika project menggunakan proses frontend terpisah, Vite dapat dijalankan
-dengan:
+Jika menjalankan proses frontend secara terpisah menggunakan Bun:
 
 ``` bash
-npm run dev
+bun run dev
 ```
 
 ## Akun Admin Development
