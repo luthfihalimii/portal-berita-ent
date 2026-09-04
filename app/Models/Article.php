@@ -17,6 +17,7 @@ class Article extends Model
         'excerpt',
         'content',
         'thumbnail',
+        'author_name',
         'status',
         'published_at',
     ];
@@ -31,6 +32,11 @@ class Article extends Model
         return [
             'published_at' => 'datetime',
         ];
+    }
+
+    public function getAuthorNameAttribute(?string $value): string
+    {
+        return filled($value) ? $value : 'Redaksi VERTONEWS';
     }
 
     public function category(): BelongsTo

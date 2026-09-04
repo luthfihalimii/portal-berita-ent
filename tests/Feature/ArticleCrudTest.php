@@ -15,6 +15,7 @@ class ArticleCrudTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Category $category;
 
     protected function setUp(): void
@@ -166,5 +167,54 @@ class ArticleCrudTest extends TestCase
         $response->assertRedirect('/admin/articles');
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
         Storage::disk('public')->assertMissing($path);
+    }
+
+    public function test_admin_can_create_article_with_author_name(): void
+    {
+        $response = $this->actingAs($this->admin)->post('/admin/articles', [
+            'category_id' => $this->category->id,
+            'title' => 'Penemuan Eksoplanet Baru',
+            'slug' => 'penemuan-eksoplanet-baru',
+            'author_name' => 'Mary Frost',
+            'excerpt' => 'Para astronom menemukan planet baru.',
+            'content' => 'Konten lengkap mengenai eksoplanet baru.',
+            'status' => 'published',
+        ]);
+
+        $response->assertRedirect('/admin/articles');
+        $this->assertDatabaseHas('articles', [
+            'title' => 'Penemuan Eksoplanet Baru',
+            'author_name' => 'Mary Frost',
+        ]);
+    }
+
+    public function test_admin_can_update_article_author_name(): void
+    {
+        $article = Article::create([
+            'category_id' => $this->category->id,
+            'title' => 'Berita Awal',
+            'slug' => 'berita-awal',
+            'author_name' => 'Penulis Lama',
+            'excerpt' => 'Ringkasan',
+            'content' => 'Konten...',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->admin)->put("/admin/articles/{$article->id}", [
+            'category_id' => $this->category->id,
+            'title' => 'Berita Awal Diperbarui',
+            'slug' => 'berita-awal',
+            'author_name' => 'Lucas Ray',
+            'excerpt' => 'Ringkasan baru',
+            'content' => 'Konten baru...',
+            'status' => 'published',
+        ]);
+
+        $response->assertRedirect('/admin/articles');
+        $this->assertDatabaseHas('articles', [
+            'id' => $article->id,
+            'author_name' => 'Lucas Ray',
+        ]);
     }
 }

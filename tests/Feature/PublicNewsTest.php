@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PublicNewsTest extends TestCase
@@ -12,6 +14,7 @@ class PublicNewsTest extends TestCase
     use RefreshDatabase;
 
     private Category $categoryTech;
+
     private Category $categorySports;
 
     protected function setUp(): void
@@ -165,5 +168,120 @@ class PublicNewsTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Eksplorasi Luar Angkasa');
         $response->assertDontSee('Draft Eksplorasi Luar Angkasa');
+    }
+
+    public function test_homepage_passes_featured_secondary_and_more_articles(): void
+    {
+        $category = Category::firstOrCreate(['slug' => 'berita-umum'], ['name' => 'Berita Umum']);
+
+        // Create 7 published articles
+        for ($i = 1; $i <= 7; $i++) {
+            Article::create([
+                'category_id' => $category->id,
+                'title' => "Berita Ke-{$i}",
+                'slug' => "berita-ke-{$i}",
+                'excerpt' => "Ringkasan berita {$i}",
+                'content' => "Isi lengkap berita {$i}",
+                'author_name' => "Penulis {$i}",
+                'status' => 'published',
+                'published_at' => now()->subMinutes($i * 10),
+            ]);
+        }
+
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertViewHas('featuredArticle');
+        $response->assertViewHas('secondaryArticles');
+        $response->assertViewHas('moreArticles');
+    }
+
+    public function test_main_layout_renders_vertonews_brand_search_and_guest_avatar(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('VERTONEWS');
+        $response->assertSee(route('news.search'));
+        $response->assertSee('name="q"', false);
+        $response->assertSee('https://x.com');
+        $response->assertSee('https://facebook.com');
+        $response->assertSee(route('login'));
+        $response->assertSee('title="Login Admin"', false);
+        $response->assertSee('Built with Laravel &amp; Tailwind CSS', false);
+    }
+
+    public function test_main_layout_renders_admin_dashboard_avatar_when_authenticated(): void
+    {
+        $user = User::create([
+            'name' => 'Editor VERTONEWS',
+            'email' => 'editor@vertonews.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee(route('admin.dashboard'));
+        $response->assertSee('Dashboard Admin (Editor VERTONEWS)');
+    }
+
+    public function test_homepage_redesign_renders_category_nav_hero_and_more_articles(): void
+    {
+        $category = Category::firstOrCreate(['slug' => 'teknologi'], ['name' => 'Teknologi']);
+
+        // Create 6 published articles
+        for ($i = 1; $i <= 6; $i++) {
+            Article::create([
+                'category_id' => $category->id,
+                'title' => "Artikel Berita {$i}",
+                'slug' => "artikel-berita-{$i}",
+                'excerpt' => "Ringkasan konten artikel berita {$i}",
+                'content' => "Konten lengkap artikel berita {$i}",
+                'author_name' => "Penulis Hebat {$i}",
+                'status' => 'published',
+                'published_at' => now()->subHours($i),
+            ]);
+        }
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+
+        // 1. Category Navigation Bar
+        $response->assertSee('Home');
+        $response->assertSee('Semua Berita');
+        $response->assertSee(route('news.index'));
+        $response->assertSee($category->name);
+        $response->assertSee(route('news.category', $category->slug));
+
+        // 2. Hero Section: Featured Article (Article 1)
+        $response->assertSee('Artikel Berita 1');
+        $response->assertSee('Ringkasan konten artikel berita 1');
+        $response->assertSee('Penulis Hebat 1');
+        $response->assertSee('read more &rarr;', false);
+
+        // 3. Hero Section: Secondary Articles (Articles 2 - 5)
+        $response->assertSee('Artikel Berita 2');
+        $response->assertSee('Artikel Berita 3');
+        $response->assertSee('Artikel Berita 4');
+        $response->assertSee('Artikel Berita 5');
+
+        // 4. Additional News Section ($moreArticles, Article 6)
+        $response->assertSee('Berita Terkini Lainnya');
+        $response->assertSee('Lihat Semua Berita');
+        $response->assertSee('Artikel Berita 6');
+
+        // 5. No trending author section
+        $response->assertDontSee('Trending Author');
+        $response->assertDontSee('trending author');
+    }
+
+    public function test_homepage_empty_state_rendered_when_no_published_articles(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('Belum Ada Berita yang Diterbitkan');
+        $response->assertSee('Login Admin untuk Menambah Berita');
     }
 }

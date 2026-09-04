@@ -29,7 +29,7 @@ class ArticleController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $query->where('title', 'like', '%'.$request->search.'%');
         }
 
         $articles = $query->paginate(10)->withQueryString();
@@ -61,6 +61,7 @@ class ArticleController extends Controller
             'category_id' => ['required', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:articles,slug'],
+            'author_name' => ['nullable', 'string', 'max:100'],
             'excerpt' => ['required', 'string'],
             'content' => ['required', 'string'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
@@ -105,6 +106,7 @@ class ArticleController extends Controller
             'category_id' => ['required', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('articles', 'slug')->ignore($article->id)],
+            'author_name' => ['nullable', 'string', 'max:100'],
             'excerpt' => ['required', 'string'],
             'content' => ['required', 'string'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],

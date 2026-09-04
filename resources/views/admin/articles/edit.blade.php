@@ -29,7 +29,7 @@
                 </div>
 
                 <!-- Slug -->
-                <div>
+                <div class="md:col-span-2">
                     <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">Slug <span class="text-red-500">*</span></label>
                     <input type="text" name="slug" id="slug" value="{{ old('slug', $article->slug) }}" required
                            class="w-full px-3 py-2 border @error('slug') border-red-500 @else border-gray-300 @enderror rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono text-xs">
@@ -52,6 +52,18 @@
                     </select>
                     @error('category_id')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Nama Penulis (Author) -->
+                <div>
+                    <label for="author_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Penulis (Author)</label>
+                    <input type="text" name="author_name" id="author_name" value="{{ old('author_name', $article->author_name ?? '') }}" 
+                           placeholder="Contoh: Adam Strong, Mary Frost"
+                           class="w-full px-3 py-2 border @error('author_name') border-red-500 @else border-gray-300 @enderror rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <p class="text-xs text-gray-500 mt-1">Opsional. Jika dikosongkan, otomatis menggunakan "Redaksi VERTONEWS".</p>
+                    @error('author_name')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>

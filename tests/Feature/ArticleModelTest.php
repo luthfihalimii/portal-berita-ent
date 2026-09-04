@@ -125,4 +125,32 @@ class ArticleModelTest extends TestCase
 
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
     }
+
+    public function test_article_can_have_author_name_and_defaults_to_redaksi(): void
+    {
+        $category = Category::create(['name' => 'Politik', 'slug' => 'politik']);
+
+        $articleWithAuthor = Article::create([
+            'category_id' => $category->id,
+            'title' => 'Berita dengan Penulis',
+            'slug' => 'berita-dengan-penulis',
+            'excerpt' => 'Ringkasan berita.',
+            'content' => 'Konten lengkap berita.',
+            'author_name' => 'Adam Strong',
+            'status' => 'published',
+        ]);
+
+        $this->assertEquals('Adam Strong', $articleWithAuthor->author_name);
+
+        $articleWithoutAuthor = Article::create([
+            'category_id' => $category->id,
+            'title' => 'Berita tanpa Penulis',
+            'slug' => 'berita-tanpa-penulis',
+            'excerpt' => 'Ringkasan berita.',
+            'content' => 'Konten lengkap berita.',
+            'status' => 'published',
+        ]);
+
+        $this->assertEquals('Redaksi VERTONEWS', $articleWithoutAuthor->author_name);
+    }
 }

@@ -23,16 +23,31 @@ class PublicNewsController extends Controller
             ->latest('published_at')
             ->first();
 
-        $latestArticles = Article::with('category')
+        $secondaryArticles = Article::with('category')
             ->where('status', 'published')
             ->when($featuredArticle, function ($query) use ($featuredArticle) {
                 $query->where('id', '!=', $featuredArticle->id);
             })
             ->latest('published_at')
-            ->take(8)
+            ->take(4)
             ->get();
 
-        return view('home', compact('categories', 'featuredArticle', 'latestArticles'));
+        $excludedIds = collect([$featuredArticle?->id])
+            ->merge($secondaryArticles->pluck('id'))
+            ->filter()
+            ->all();
+
+        $moreArticles = Article::with('category')
+            ->where('status', 'published')
+            ->whereNotIn('id', $excludedIds)
+            ->latest('published_at')
+            ->take(6)
+            ->get();
+
+        // Kept for backward compatibility with current home.blade.php until Task 6
+        $latestArticles = $secondaryArticles;
+
+        return view('home', compact('categories', 'featuredArticle', 'secondaryArticles', 'moreArticles', 'latestArticles'));
     }
 
     /**
@@ -99,8 +114,8 @@ class PublicNewsController extends Controller
         $articles = Article::with('category')
             ->where('status', 'published')
             ->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', '%' . $keyword . '%')
-                      ->orWhere('excerpt', 'like', '%' . $keyword . '%');
+                $query->where('title', 'like', '%'.$keyword.'%')
+                    ->orWhere('excerpt', 'like', '%'.$keyword.'%');
             })
             ->latest('published_at')
             ->paginate(9)
