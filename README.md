@@ -1,58 +1,490 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CRUDBerita
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Portal berita sederhana berbasis Laravel yang menyediakan halaman publik
+untuk membaca berita dan dashboard admin untuk mengelola kategori serta
+artikel menggunakan operasi CRUD.
 
-## About Laravel
+Project ini dibuat sebagai implementasi pembelajaran framework Laravel
+dengan fokus pada struktur kode yang sederhana, readable, aman, dan
+mudah dijelaskan saat proses validasi.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Public
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   Beranda portal berita
+-   Daftar berita
+-   Detail berita
+-   Pencarian berita
+-   Filter berdasarkan kategori
+-   Pagination
+-   Hanya berita `published` yang ditampilkan kepada publik
 
-## Learning Laravel
+### Admin
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-   Login admin
+-   Dashboard
+-   Statistik sederhana
+-   CRUD kategori
+-   CRUD berita
+-   Upload thumbnail berita
+-   Status berita `draft` / `published`
+-   Validasi form
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+  Teknologi      Kegunaan
+  -------------- -----------------------------------------
+  PHP            Bahasa pemrograman backend
+  Laravel        Framework aplikasi web
+  Blade          Template engine
+  Tailwind CSS   Styling dan responsive UI
+  Vite           Asset bundling dan frontend development
+  Eloquent ORM   Interaksi dengan database
+  SQLite         Database development
+  Git            Version control
 
-## Agentic Development
+> Database dapat diganti ke MySQL atau PostgreSQL melalui konfigurasi
+> `.env` jika diperlukan.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Requirement
 
-```bash
-composer require laravel/boost --dev
+Pastikan environment sudah memiliki:
 
-php artisan boost:install
+-   PHP 8.3+
+-   Composer
+-   Node.js dan NPM
+-   Git
+
+Untuk memastikan requirement tersedia:
+
+``` bash
+php -v
+composer -V
+node -v
+npm -v
+git --version
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Instalasi
 
-## Contributing
+### 1. Clone repository
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+``` bash
+git clone <repository-url>
+cd portal-berita
+```
 
-## Code of Conduct
+Ganti `<repository-url>` dengan URL repository GitHub project.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 2. Install dependency PHP
 
-## Security Vulnerabilities
+``` bash
+composer install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. Buat file environment
+
+Linux/macOS:
+
+``` bash
+cp .env.example .env
+```
+
+Windows:
+
+``` powershell
+copy .env.example .env
+```
+
+### 4. Generate application key
+
+``` bash
+php artisan key:generate
+```
+
+### 5. Konfigurasi database
+
+Secara default project dapat menggunakan SQLite.
+
+Pastikan file database tersedia:
+
+``` text
+database/database.sqlite
+```
+
+Kemudian pastikan `.env` menggunakan konfigurasi database yang sesuai.
+
+Contoh:
+
+``` env
+DB_CONNECTION=sqlite
+```
+
+Jika menggunakan MySQL/PostgreSQL, ubah konfigurasi database di `.env`
+sesuai environment masing-masing.
+
+**Jangan commit file `.env` ke repository.**
+
+### 6. Jalankan migration dan seeder
+
+``` bash
+php artisan migrate --seed
+```
+
+Seeder menyediakan data dummy untuk development, termasuk akun admin,
+kategori, dan berita contoh.
+
+### 7. Install dependency frontend
+
+``` bash
+npm install
+```
+
+### 8. Build asset
+
+``` bash
+npm run build
+```
+
+### 9. Jalankan aplikasi
+
+``` bash
+php artisan serve
+```
+
+Kemudian buka:
+
+``` text
+http://127.0.0.1:8000
+```
+
+## Development Mode
+
+Untuk development, jalankan:
+
+``` bash
+composer run dev
+```
+
+Jika project menggunakan proses frontend terpisah, Vite dapat dijalankan
+dengan:
+
+``` bash
+npm run dev
+```
+
+## Akun Admin Development
+
+Seeder menyediakan akun admin untuk kebutuhan development.
+
+Gunakan credential yang ditampilkan atau ditentukan di file seeder
+project.
+
+**Catatan:** credential development hanya untuk local/testing. Jangan
+menggunakan password tersebut untuk production.
+
+## Struktur Fitur
+
+``` text
+Public
+├── Home
+├── Daftar Berita
+├── Detail Berita
+├── Search
+└── Filter Kategori
+
+Admin
+├── Login
+├── Dashboard
+├── Kategori
+│   ├── Create
+│   ├── Read
+│   ├── Update
+│   └── Delete
+└── Berita
+    ├── Create
+    ├── Read
+    ├── Update
+    └── Delete
+```
+
+## Struktur Database
+
+Relasi utama:
+
+``` text
+Category
+    │
+    │ 1
+    │
+    │ N
+    ▼
+Article
+```
+
+### Categories
+
+``` text
+id
+name
+slug
+created_at
+updated_at
+```
+
+### Articles
+
+``` text
+id
+category_id
+title
+slug
+excerpt
+content
+thumbnail
+status
+published_at
+created_at
+updated_at
+```
+
+`articles.category_id` merupakan foreign key yang mengarah ke
+`categories.id`.
+
+Satu kategori dapat memiliki banyak artikel, sedangkan satu artikel
+memiliki satu kategori.
+
+## Alur Aplikasi
+
+Secara sederhana, request diproses dengan alur:
+
+``` text
+Browser
+   ↓
+Route
+   ↓
+Middleware
+   ↓
+Controller
+   ↓
+Validation
+   ↓
+Eloquent Model
+   ↓
+Database
+   ↓
+Blade View
+   ↓
+Browser
+```
+
+Contoh ketika admin membuat berita:
+
+``` text
+Admin mengisi form
+        ↓
+POST /admin/articles
+        ↓
+ArticleController
+        ↓
+Validasi input
+        ↓
+Article Model / Eloquent
+        ↓
+Database
+        ↓
+Redirect
+        ↓
+Daftar berita
+```
+
+## Validasi
+
+Input pengguna divalidasi di server menggunakan Laravel Validation.
+
+Data berita minimal divalidasi untuk:
+
+-   Kategori wajib tersedia.
+-   Judul wajib diisi.
+-   Slug wajib dan unik.
+-   Excerpt wajib diisi.
+-   Content wajib diisi.
+-   Thumbnail harus berupa gambar jika diupload.
+-   Status hanya `draft` atau `published`.
+
+## Keamanan
+
+Project menerapkan keamanan dasar Laravel:
+
+-   Authentication untuk halaman admin.
+-   Middleware untuk melindungi route admin.
+-   CSRF protection pada form.
+-   Server-side validation.
+-   Password hashing.
+-   Mass assignment protection.
+-   Eloquent/query builder untuk mencegah SQL injection.
+-   Blade escaping untuk mencegah XSS pada output normal.
+-   Validasi upload thumbnail.
+-   Secret dan credential disimpan melalui `.env`.
+-   File `.env` tidak boleh dimasukkan ke repository.
+-   Artikel draft tidak ditampilkan pada halaman publik.
+
+## Testing
+
+Jalankan automated test dengan:
+
+``` bash
+php artisan test
+```
+
+Selain automated test, lakukan pengujian manual terhadap:
+
+### Public
+
+-   [ ] Homepage dapat dibuka.
+-   [ ] Daftar berita dapat dibuka.
+-   [ ] Detail berita dapat dibuka.
+-   [ ] Search bekerja.
+-   [ ] Filter kategori bekerja.
+-   [ ] Draft tidak muncul di halaman publik.
+
+### Admin
+
+-   [ ] Login berhasil.
+-   [ ] Guest tidak dapat membuka dashboard.
+-   [ ] Admin dapat membuat kategori.
+-   [ ] Admin dapat mengubah kategori.
+-   [ ] Admin dapat menghapus kategori.
+-   [ ] Admin dapat membuat berita.
+-   [ ] Admin dapat mengubah berita.
+-   [ ] Admin dapat menghapus berita.
+-   [ ] Validasi form bekerja.
+-   [ ] Upload thumbnail bekerja.
+
+## Git Workflow
+
+Gunakan commit message yang jelas.
+
+Contoh:
+
+``` text
+chore: initialize laravel project
+feat: add category migration and model
+feat: implement category crud
+feat: implement article crud
+feat: add admin authentication
+feat: add public article pages
+feat: add article search
+fix: prevent draft articles from public pages
+docs: add project documentation
+```
+
+Jangan commit file sensitif seperti:
+
+``` text
+.env
+```
+
+## Project Structure
+
+Struktur utama project mengikuti konvensi Laravel:
+
+``` text
+portal-berita/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   └── Models/
+│
+├── database/
+│   ├── migrations/
+│   └── seeders/
+│
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       ├── articles/
+│       ├── categories/
+│       └── admin/
+│
+├── routes/
+│   └── web.php
+│
+├── public/
+├── storage/
+├── tests/
+├── .env.example
+├── AGENTS.md
+├── PRD.md
+├── README.md
+├── composer.json
+└── package.json
+```
+
+## Development Principle
+
+Project ini mengutamakan:
+
+``` text
+Simple
+   +
+Readable
+   +
+Secure
+   +
+Maintainable
+```
+
+Fitur tidak dibuat terlalu kompleks karena project akan melalui proses
+validasi di mana developer harus dapat menjelaskan alur dan kode yang
+digunakan.
+
+AI coding assistant dapat digunakan untuk membantu development, tetapi
+seluruh kode yang dihasilkan tetap harus dipahami, diperiksa, dan diuji
+oleh developer.
+
+## Scope
+
+### Wajib
+
+-   Laravel setup
+-   Database
+-   Migration
+-   Model dan relationship
+-   Authentication admin
+-   Dashboard
+-   CRUD kategori
+-   CRUD berita
+-   Public news page
+-   Detail berita
+-   Search
+-   Filter kategori
+-   Thumbnail upload
+-   Validation
+-   Basic security
+-   Seeder
+-   README
+-   GitHub repository
+
+### Di luar scope utama
+
+Fitur berikut tidak diperlukan kecuali diminta secara khusus:
+
+-   Komentar
+-   Like
+-   Bookmark
+-   Newsletter
+-   Notification
+-   Real-time feature
+-   Advanced analytics
+-   Recommendation system
+-   Microservices
+-   GraphQL
+-   WebSocket
+-   Payment system
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project ini dibuat untuk kebutuhan pembelajaran dan tugas pengembangan
+aplikasi web.
