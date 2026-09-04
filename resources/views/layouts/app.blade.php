@@ -12,7 +12,7 @@
     <header class="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Left Section: Search Toggle & Hamburger Menu -->
+                <!-- Left Section: Search Toggle -->
                 <div class="flex items-center">
                     <button type="button" 
                             id="search-toggle-btn" 
@@ -21,21 +21,6 @@
                             title="Cari Berita">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </button>
-
-                    <div class="h-4 w-px bg-gray-300 mx-2 sm:mx-3" aria-hidden="true"></div>
-
-                    <button type="button" 
-                            id="mobile-menu-btn" 
-                            class="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-full transition focus:outline-none focus:ring-2 focus:ring-gray-300" 
-                            aria-label="Buka Menu Navigasi" 
-                            title="Menu Navigasi">
-                        <svg id="hamburger-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg id="close-menu-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
@@ -132,67 +117,6 @@
             </div>
         </div>
 
-        <!-- Mobile Drawer / Dropdown -->
-        <div id="mobile-drawer" class="hidden border-t border-gray-200 bg-white transition-all duration-200 shadow-md">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-4">
-                <!-- Navigation links -->
-                <nav class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <a href="{{ route('home') }}" 
-                       class="flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('home') ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-100' }} transition">
-                        Beranda
-                    </a>
-                    <a href="{{ route('news.index') }}" 
-                       class="flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('news.index') ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-100' }} transition">
-                        Semua Berita
-                    </a>
-                </nav>
-
-                <!-- Categories Section -->
-                @php
-                    $navCategories = $categories ?? \App\Models\Category::orderBy('name')->get();
-                @endphp
-                @if ($navCategories->isNotEmpty())
-                    <div class="pt-3 border-t border-gray-100">
-                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2.5 px-1">Kategori</p>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach ($navCategories as $navCategory)
-                                <a href="{{ route('news.category', $navCategory->slug) }}" 
-                                   class="px-3 py-1.5 text-xs font-medium rounded-full border {{ request()->is('berita/kategori/' . $navCategory->slug) ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-700 hover:border-black hover:text-black bg-gray-50' }} transition">
-                                    {{ $navCategory->name }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Admin Access Section -->
-                <div class="pt-3 border-t border-gray-100">
-                    @auth
-                        <a href="{{ route('admin.dashboard') }}" 
-                           class="flex items-center justify-between px-4 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition">
-                            <span class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                                <span>Dashboard Admin ({{ Auth::user()->name }})</span>
-                            </span>
-                            <span>&rarr;</span>
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" 
-                           class="flex items-center justify-between px-4 py-2.5 rounded-lg border border-gray-300 text-gray-800 text-sm font-medium hover:border-black hover:text-black transition">
-                            <span class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                </svg>
-                                <span>Login Admin</span>
-                            </span>
-                            <span>&rarr;</span>
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
     </header>
 
     <!-- Main Content -->
@@ -250,60 +174,23 @@
             const searchSlideDown = document.getElementById('search-slide-down');
             const searchInput = document.getElementById('search-input');
 
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mobileDrawer = document.getElementById('mobile-drawer');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const closeMenuIcon = document.getElementById('close-menu-icon');
-
             function toggleSearch() {
                 const isHidden = searchSlideDown.classList.contains('hidden');
                 if (isHidden) {
                     searchSlideDown.classList.remove('hidden');
-                    if (!mobileDrawer.classList.contains('hidden')) {
-                        closeMenu();
-                    }
                     setTimeout(() => searchInput?.focus(), 50);
                 } else {
                     searchSlideDown.classList.add('hidden');
                 }
             }
 
-            function openMenu() {
-                mobileDrawer.classList.remove('hidden');
-                hamburgerIcon?.classList.add('hidden');
-                closeMenuIcon?.classList.remove('hidden');
-                if (!searchSlideDown.classList.contains('hidden')) {
-                    searchSlideDown.classList.add('hidden');
-                }
-            }
-
-            function closeMenu() {
-                mobileDrawer.classList.add('hidden');
-                hamburgerIcon?.classList.remove('hidden');
-                closeMenuIcon?.classList.add('hidden');
-            }
-
-            function toggleMenu() {
-                if (mobileDrawer.classList.contains('hidden')) {
-                    openMenu();
-                } else {
-                    closeMenu();
-                }
-            }
-
             searchToggleBtn?.addEventListener('click', toggleSearch);
             searchCloseBtn?.addEventListener('click', toggleSearch);
-            mobileMenuBtn?.addEventListener('click', toggleMenu);
 
             // Close on Escape key press
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') {
-                    if (!searchSlideDown.classList.contains('hidden')) {
-                        searchSlideDown.classList.add('hidden');
-                    }
-                    if (!mobileDrawer.classList.contains('hidden')) {
-                        closeMenu();
-                    }
+                if (e.key === 'Escape' && !searchSlideDown.classList.contains('hidden')) {
+                    searchSlideDown.classList.add('hidden');
                 }
             });
         });
