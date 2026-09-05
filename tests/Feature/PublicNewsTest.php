@@ -60,6 +60,45 @@ class PublicNewsTest extends TestCase
         $response->assertDontSee('Rahasia Internal Perusahaan');
     }
 
+    public function test_homepage_can_sort_published_articles_from_oldest_to_newest(): void
+    {
+        $oldArticle = Article::create([
+            'category_id' => $this->categoryTech->id,
+            'title' => 'Berita Paling Lama',
+            'slug' => 'berita-paling-lama',
+            'excerpt' => 'Berita lama.',
+            'content' => 'Isi berita lama.',
+            'status' => 'published',
+            'published_at' => now()->subDays(3),
+        ]);
+
+        $newArticle = Article::create([
+            'category_id' => $this->categoryTech->id,
+            'title' => 'Berita Paling Baru',
+            'slug' => 'berita-paling-baru',
+            'excerpt' => 'Berita baru.',
+            'content' => 'Isi berita baru.',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->get('/?sort=oldest');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('sort', 'oldest');
+        $response->assertViewHas('featuredArticle', $oldArticle);
+        $response->assertSeeInOrder(['Berita Paling Lama', 'Berita Paling Baru']);
+        $response->assertDontSee('sort=latest');
+    }
+
+    public function test_homepage_rejects_an_invalid_news_sort(): void
+    {
+        $response = $this->get('/?sort=invalid');
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('sort');
+    }
+
     public function test_can_view_all_published_news_list(): void
     {
         Article::create([

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -27,29 +26,6 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
-
-        // Verifikasi Cloudflare Turnstile Captcha
-        if (! app()->environment('testing')) {
-            $turnstileResponse = $request->input('cf-turnstile-response');
-
-            if (! $turnstileResponse) {
-                return back()->withErrors([
-                    'captcha' => 'Verifikasi Cloudflare Turnstile diperlukan.',
-                ])->onlyInput('email');
-            }
-
-            $siteverify = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-                'secret' => config('services.turnstile.secret'),
-                'response' => $turnstileResponse,
-                'remoteip' => $request->ip(),
-            ]);
-
-            if (! $siteverify->json('success')) {
-                return back()->withErrors([
-                    'captcha' => 'Verifikasi captcha Cloudflare gagal. Silakan coba lagi.',
-                ])->onlyInput('email');
-            }
-        }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();

@@ -12,15 +12,21 @@ class PublicNewsController extends Controller
     /**
      * Display the public homepage.
      */
-    public function home(): View
+    public function home(Request $request): View
     {
+        $sort = $request->validate([
+            'sort' => ['nullable', 'in:latest,oldest'],
+        ])['sort'] ?? 'latest';
+        $sortDirection = $sort === 'oldest' ? 'asc' : 'desc';
+
         $categories = Category::has('articles')->withCount(['articles' => function ($query) {
             $query->where('status', 'published');
         }])->orderBy('name')->get();
 
         $featuredArticle = Article::with('category')
             ->where('status', 'published')
-            ->latest('published_at')
+            ->orderBy('published_at', $sortDirection)
+            ->orderBy('id', $sortDirection)
             ->first();
 
         $secondaryArticles = Article::with('category')
@@ -28,7 +34,8 @@ class PublicNewsController extends Controller
             ->when($featuredArticle, function ($query) use ($featuredArticle) {
                 $query->where('id', '!=', $featuredArticle->id);
             })
-            ->latest('published_at')
+            ->orderBy('published_at', $sortDirection)
+            ->orderBy('id', $sortDirection)
             ->take(4)
             ->get();
 
@@ -40,14 +47,15 @@ class PublicNewsController extends Controller
         $moreArticles = Article::with('category')
             ->where('status', 'published')
             ->whereNotIn('id', $excludedIds)
-            ->latest('published_at')
+            ->orderBy('published_at', $sortDirection)
+            ->orderBy('id', $sortDirection)
             ->take(6)
             ->get();
 
         // Kept for backward compatibility with current home.blade.php until Task 6
         $latestArticles = $secondaryArticles;
 
-        return view('home', compact('categories', 'featuredArticle', 'secondaryArticles', 'moreArticles', 'latestArticles'));
+        return view('home', compact('categories', 'featuredArticle', 'secondaryArticles', 'moreArticles', 'latestArticles', 'sort'));
     }
 
     /**

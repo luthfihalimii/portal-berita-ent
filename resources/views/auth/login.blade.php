@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login Admin - CRUDBerita</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
     <div class="max-w-md w-full">
@@ -57,12 +56,6 @@
                         <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
                     </label>
-                </div>
-
-                <!-- Cloudflare Turnstile Captcha -->
-                <div class="cf-turnstile flex justify-center py-1" 
-                     data-sitekey="{{ config('services.turnstile.key') }}" 
-                     data-theme="light">
                 </div>
 
                 <button type="submit" 

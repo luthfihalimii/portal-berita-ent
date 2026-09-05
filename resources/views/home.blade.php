@@ -22,6 +22,25 @@
         </nav>
     </div>
 
+    <!-- News Sort Filter -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">Urutkan Berita</p>
+            <p class="mt-1 text-sm text-gray-600">Pilih berita terbaru atau mulai dari berita terlama.</p>
+        </div>
+        <form method="GET" action="{{ route('home') }}" class="flex items-center gap-2">
+            <label for="sort" class="sr-only">Urutan berita</label>
+            <select id="sort" name="sort" onchange="this.form.submit()"
+                    class="rounded-xl border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm focus:border-black focus:ring-black">
+                <option value="latest" @selected($sort === 'latest')>Terbaru</option>
+                <option value="oldest" @selected($sort === 'oldest')>Terlama</option>
+            </select>
+            <noscript>
+                <button type="submit" class="rounded-xl bg-black px-3 py-2 text-sm font-semibold text-white">Terapkan</button>
+            </noscript>
+        </form>
+    </div>
+
     <!-- Hero Section (2-Column Magazine Layout) -->
     @if ($featuredArticle)
         <section class="grid grid-cols-1 {{ $secondaryArticles->isNotEmpty() ? 'lg:grid-cols-12' : '' }} gap-8 lg:gap-10 items-start pt-4">
