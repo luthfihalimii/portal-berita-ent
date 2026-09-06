@@ -186,4 +186,47 @@ class Article extends Model
 
         return $data;
     }
+
+    /**
+     * Judul SEO untuk halaman detail artikel.
+     */
+    public function getSeoTitleAttribute(): string
+    {
+        return $this->title.' - HalimiNews';
+    }
+
+    /**
+     * URL gambar Open Graph untuk dibagikan ke media sosial.
+     * Mengembalikan null jika artikel tidak punya thumbnail
+     * (layout akan memakai og-image default).
+     */
+    public function getOgImageUrlAttribute(): ?string
+    {
+        return $this->thumbnail ? asset('storage/'.$this->thumbnail) : null;
+    }
+
+    /**
+     * URL kanonik halaman artikel.
+     */
+    public function getCanonicalUrlAttribute(): string
+    {
+        return route('news.show', $this->slug);
+    }
+
+    /**
+     * Kumpulan meta SEO halaman detail artikel dalam satu array.
+     * Memusatkan logic SEO agar controller/view tetap ramping.
+     *
+     * @return array{title: string, metaDescription: string, ogType: string, ogImage: ?string, canonicalUrl: string}
+     */
+    public function getSeoMetaAttribute(): array
+    {
+        return [
+            'title' => $this->seo_title,
+            'metaDescription' => $this->excerpt,
+            'ogType' => 'article',
+            'ogImage' => $this->og_image_url,
+            'canonicalUrl' => $this->canonical_url,
+        ];
+    }
 }

@@ -115,14 +115,11 @@ class PublicNewsController extends Controller
 
         $categories = Category::cached();
 
-        // SEO meta untuk halaman detail artikel
-        $title = $article->title.' - HalimiNews';
-        $metaDescription = $article->excerpt;
-        $ogType = 'article';
-        $ogImage = $article->thumbnail ? asset('storage/'.$article->thumbnail) : null;
-        $canonicalUrl = route('news.show', $article->slug);
-
-        $view = view('articles.public-show', compact('article', 'relatedArticles', 'categories', 'title', 'metaDescription', 'ogType', 'ogImage', 'canonicalUrl'));
+        // Meta SEO dibangun terpusat di model (Article::seo_meta)
+        $view = view('articles.public-show', array_merge(
+            compact('article', 'relatedArticles', 'categories'),
+            $article->seo_meta
+        ));
 
         // ETag stabil berbasis updated_at + id artikel agar cache browser
         // hanya invalid ketika artikel benar-benar berubah.

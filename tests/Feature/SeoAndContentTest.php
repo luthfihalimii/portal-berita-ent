@@ -137,6 +137,68 @@ class SeoAndContentTest extends TestCase
     }
 
     // ------------------------------------------------------------------
+    // SEO meta accessor (refactor)
+    // ------------------------------------------------------------------
+
+    public function test_seo_meta_accessor_returns_complete_meta(): void
+    {
+        $article = $this->createPublishedArticle(['slug' => 'berita-seo-meta']);
+
+        $meta = $article->seo_meta;
+
+        $this->assertSame('Berita Uji - HalimiNews', $meta['title']);
+        $this->assertSame('Ringkasan berita uji.', $meta['metaDescription']);
+        $this->assertSame('article', $meta['ogType']);
+        $this->assertSame(route('news.show', 'berita-seo-meta'), $meta['canonicalUrl']);
+        $this->assertNull($meta['ogImage']); // tidak ada thumbnail
+    }
+
+    public function test_og_image_url_uses_thumbnail_when_present(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('thumbnails/foto.jpg', 'dummy');
+
+        $article = $this->createPublishedArticle(['thumbnail' => 'thumbnails/foto.jpg']);
+
+        $this->assertStringContainsString('thumbnails/foto.jpg', $article->og_image_url);
+    }
+
+    public function test_article_page_renders_seo_meta_from_accessor(): void
+    {
+        $this->createPublishedArticle([
+            'slug' => 'berita-seo-render',
+            'title' => 'Judul Untuk SEO',
+        ]);
+
+        $response = $this->get('/berita/berita-seo-render');
+
+        $response->assertStatus(200);
+        $response->assertSee('<title>Judul Untuk SEO - HalimiNews</title>', false);
+    }
+
+    // ------------------------------------------------------------------
+    // Auto-save draft hook
+    // ------------------------------------------------------------------
+
+    public function test_create_form_has_autosave_hook(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin/articles/create');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-autosave-form', false);
+    }
+
+    public function test_edit_form_has_autosave_hook(): void
+    {
+        $article = $this->createPublishedArticle();
+
+        $response = $this->actingAs($this->admin)->get("/admin/articles/{$article->id}/edit");
+
+        $response->assertStatus(200);
+        $response->assertSee('data-autosave-form', false);
+    }
+
+    // ------------------------------------------------------------------
     // Inline image optimization (responsive srcset)
     // ------------------------------------------------------------------
 

@@ -1,5 +1,6 @@
 import 'trix';
 import 'trix/dist/trix.css';
+import { initArticleAutosave } from './article-autosave.js';
 
 /**
  * Nonaktifkan caption default attachment (nama file + ukuran) pada gambar.
@@ -11,6 +12,9 @@ import 'trix/dist/trix.css';
 if (window.Trix?.config?.attachments?.preview) {
     window.Trix.config.attachments.preview.caption = { name: false, size: false };
 }
+
+// Inisialisasi auto-save draft form artikel (create & edit)
+document.addEventListener('DOMContentLoaded', initArticleAutosave);
 
 /**
  * Trix Rich Text Editor - Attachment Upload Handler
