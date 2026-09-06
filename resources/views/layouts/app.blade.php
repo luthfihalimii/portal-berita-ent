@@ -13,6 +13,9 @@
     <!-- SEO Meta -->
     <meta name="description" content="{{ $metaDescription ?? 'HalimiNews - Portal berita terkini, terpercaya, dan aktual. Baca berita terbaru seputar politik, ekonomi, teknologi, olahraga, dan lainnya.' }}">
 
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="HalimiNews RSS Feed" href="{{ route('feed') }}">
+
     <!-- Open Graph -->
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:site_name" content="HalimiNews">

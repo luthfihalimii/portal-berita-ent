@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicNewsController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 // Public Portal Routes
@@ -13,6 +14,9 @@ Route::get('/berita', [PublicNewsController::class, 'index'])->name('news.index'
 Route::get('/berita/{slug}', [PublicNewsController::class, 'show'])->name('news.show');
 Route::get('/berita/kategori/{slug}', [PublicNewsController::class, 'category'])->name('news.category');
 Route::get('/search', [PublicNewsController::class, 'search'])->name('news.search');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+Route::get('/feed', [SitemapController::class, 'feed'])->name('feed');
 
 // Authentication routes (guest only)
 Route::middleware('guest')->group(function () {

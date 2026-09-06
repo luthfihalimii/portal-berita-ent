@@ -102,4 +102,53 @@ class Article extends Model
 
         return $content;
     }
+
+    /**
+     * Estimasi waktu baca dalam menit (asumsi 200 kata/menit, minimal 1 menit).
+     */
+    public function getReadingTimeAttribute(): int
+    {
+        $wordCount = str_word_count(strip_tags($this->content ?? ''));
+
+        return max(1, (int) ceil($wordCount / 200));
+    }
+
+    /**
+     * Structured data JSON-LD (schema.org NewsArticle) untuk SEO.
+     *
+     * @return array<string, mixed>
+     */
+    public function getJsonLdAttribute(): array
+    {
+        $data = [
+            '@context' => 'https://schema.org',
+            '@type' => 'NewsArticle',
+            'headline' => $this->title,
+            'description' => $this->excerpt,
+            'datePublished' => $this->published_at?->toAtomString(),
+            'dateModified' => $this->updated_at?->toAtomString(),
+            'author' => [
+                '@type' => 'Person',
+                'name' => $this->author_name,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'HalimiNews',
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('favicon.svg'),
+                ],
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => route('news.show', $this->slug),
+            ],
+        ];
+
+        if ($this->thumbnail) {
+            $data['image'] = [asset('storage/'.$this->thumbnail)];
+        }
+
+        return $data;
+    }
 }

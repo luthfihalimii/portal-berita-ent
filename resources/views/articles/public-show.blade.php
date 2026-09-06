@@ -2,6 +2,7 @@
 
 @section('content')
 <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <script type="application/ld+json">{!! json_encode($article->json_ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-xs text-gray-500">
         <a href="{{ route('home') }}" class="hover:text-black transition">Beranda</a>
@@ -21,6 +22,13 @@
             </span>
             <span>&bull;</span>
             <span>{{ $article->published_for_humans }}</span>
+            <span>&bull;</span>
+            <span class="inline-flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>{{ $article->reading_time }} menit baca</span>
+            </span>
         </div>
 
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-[1.15] tracking-tight">

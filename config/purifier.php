@@ -32,8 +32,10 @@ return [
         ],
         'article' => [
             'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'h1,h2,h3,h4,h5,h6,blockquote,pre,div,p,br,strong,b,em,i,u,s,strike,del,a[href|title|target],ul,ol,li,figure,figcaption,img[src|alt|width|height],span,hr',
+            'HTML.Allowed'             => 'h1,h2,h3,h4,h5,h6,blockquote,pre,div,p,br,strong,b,em,i,u,s,strike,del,a[href|title|target],ul,ol,li,figure,figcaption,img[src|srcset|sizes|alt|width|height],span,hr',
             'Attr.AllowedFrameTargets' => ['_blank', '_self'],
+            'HTML.DefinitionID'        => 'html5-definitions',
+            'HTML.DefinitionRev'       => 1,
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => true,
         ],
@@ -100,6 +102,8 @@ return [
                 ['tr', 'width', 'Text'],
                 ['tr', 'height', 'Text'],
                 ['tr', 'border', 'Text'],
+                ['img', 'srcset', 'Text'],
+                ['img', 'sizes', 'Text'],
             ],
         ],
         'custom_attributes' => [

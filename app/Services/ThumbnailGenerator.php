@@ -28,8 +28,17 @@ class ThumbnailGenerator
      */
     public function store(UploadedFile $file): string
     {
-        // Simpan file asli seperti biasa
-        $path = $file->store('thumbnails', 'public');
+        return $this->storeAs($file, 'thumbnails');
+    }
+
+    /**
+     * Simpan file upload ke direktori tertentu + buat variant responsive.
+     *
+     * @return string Path file asli di disk public
+     */
+    public function storeAs(UploadedFile $file, string $directory): string
+    {
+        $path = $file->store($directory, 'public');
 
         $this->generateVariants($path);
 
@@ -108,7 +117,7 @@ class ThumbnailGenerator
     {
         $info = pathinfo($originalPath);
 
-        return $info['dirname'] . '/' . $info['filename'] . '-' . $variant . '.webp';
+        return $info['dirname'].'/'.$info['filename'].'-'.$variant.'.webp';
     }
 
     /**
@@ -122,12 +131,12 @@ class ThumbnailGenerator
         foreach (self::VARIANTS as $name => $width) {
             $variantPath = $this->variantPath($originalPath, $name);
             if ($disk->exists($variantPath)) {
-                $sources[] = asset('storage/' . $variantPath) . ' ' . $width . 'w';
+                $sources[] = asset('storage/'.$variantPath).' '.$width.'w';
             }
         }
 
         // Selalu sertakan file asli sebagai fallback terbesar
-        $sources[] = asset('storage/' . $originalPath) . ' 1600w';
+        $sources[] = asset('storage/'.$originalPath).' 1600w';
 
         return implode(', ', $sources);
     }

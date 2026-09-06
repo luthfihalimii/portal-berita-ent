@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\ArticleContentImages;
 use App\Services\ThumbnailGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -72,6 +73,7 @@ class ArticleController extends Controller
         ]);
 
         $validated['content'] = Purifier::clean($validated['content'], 'article');
+        $validated['content'] = app(ArticleContentImages::class)->addResponsiveAttributes($validated['content']);
 
         if ($request->hasFile('thumbnail')) {
             $validated['thumbnail'] = app(ThumbnailGenerator::class)->store($request->file('thumbnail'));
@@ -119,6 +121,10 @@ class ArticleController extends Controller
         ]);
 
         $validated['content'] = Purifier::clean($validated['content'], 'article');
+        $validated['content'] = app(ArticleContentImages::class)->addResponsiveAttributes($validated['content']);
+
+        // Tangkap konten lama SEBELUM update untuk keperluan cleanup gambar inline
+        $previousContent = $article->content;
 
         if ($request->hasFile('thumbnail')) {
             if ($article->thumbnail) {
@@ -138,6 +144,9 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
+        // Bersihkan gambar inline yang dihapus dari konten dan tidak dipakai artikel lain
+        $this->cleanupOrphanedContentImages($article, $previousContent, $validated['content']);
+
         return redirect()->route('admin.articles.index')->with('success', 'Berita berhasil diperbarui.');
     }
 
@@ -150,7 +159,14 @@ class ArticleController extends Controller
             app(ThumbnailGenerator::class)->delete($article->thumbnail);
         }
 
+        $contentImages = app(ArticleContentImages::class);
+        $previousPaths = $contentImages->extractPaths($article->content);
+
         $article->delete();
+
+        // Hapus gambar inline milik artikel ini yang tidak dipakai artikel lain
+        $keepPaths = $contentImages->pathsUsedByOtherArticles($article->id);
+        $contentImages->deleteOrphans($previousPaths, $keepPaths);
 
         return redirect()->route('admin.articles.index')->with('success', 'Berita berhasil dihapus.');
     }
@@ -158,8 +174,8 @@ class ArticleController extends Controller
     /**
      * Handle image upload dari Trix rich text editor.
      *
-     * Menyimpan gambar ke disk public dan mengembalikan URL-nya
-     * agar bisa disematkan ke dalam konten artikel.
+     * Menyimpan gambar ke disk public sekaligus membuat variant WebP
+     * responsive, lalu mengembalikan URL-nya untuk disematkan ke konten.
      */
     public function uploadImage(Request $request): JsonResponse
     {
@@ -167,10 +183,34 @@ class ArticleController extends Controller
             'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
         ]);
 
-        $path = $request->file('image')->store('article-images', 'public');
+        $path = app(ThumbnailGenerator::class)->storeAs(
+            $request->file('image'),
+            'article-images'
+        );
 
         return response()->json([
             'url' => Storage::disk('public')->url($path),
         ]);
+    }
+
+    /**
+     * Hapus gambar inline yang ada di konten lama tapi sudah tidak ada di
+     * konten baru, dan tidak dipakai oleh artikel lain.
+     */
+    protected function cleanupOrphanedContentImages(Article $article, ?string $previousContent, string $newContent): void
+    {
+        $contentImages = app(ArticleContentImages::class);
+
+        $previousPaths = $contentImages->extractPaths($previousContent);
+        $currentPaths = $contentImages->extractPaths($newContent);
+
+        $removedPaths = array_diff($previousPaths, $currentPaths);
+
+        if (empty($removedPaths)) {
+            return;
+        }
+
+        $keepPaths = $contentImages->pathsUsedByOtherArticles($article->id);
+        $contentImages->deleteOrphans($removedPaths, $keepPaths);
     }
 }
