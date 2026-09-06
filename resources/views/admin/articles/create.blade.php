@@ -83,9 +83,11 @@
             <!-- Isi Berita / Content -->
             <div>
                 <label for="content" class="block text-sm font-semibold text-gray-700 mb-1.5">Isi Berita Lengkap <span class="text-red-500">*</span></label>
-                <textarea name="content" id="content" rows="10" required
-                          placeholder="Tulis artikel berita secara detail di sini..."
-                          class="w-full px-3.5 py-2.5 border @error('content') border-red-400 @else border-gray-300 @enderror rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-sm transition">{{ old('content') }}</textarea>
+                <input id="content" type="hidden" name="content" value="{{ old('content') }}">
+                <trix-editor input="content"
+                             data-upload-url="{{ route('admin.articles.upload-image') }}"
+                             placeholder="Tulis artikel berita secara detail di sini..."
+                             class="trix-content block w-full border @error('content') border-red-400 @else border-gray-300 @enderror rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white"></trix-editor>
                 @error('content')
                     <p class="text-xs text-red-500 mt-1.5">{{ $message }}</p>
                 @enderror

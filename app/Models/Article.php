@@ -51,7 +51,7 @@ class Article extends Model
         }
 
         if ($this->published_at->isToday()) {
-            return $this->published_at->format('H:i') . ', Hari ini';
+            return $this->published_at->format('H:i').', Hari ini';
         }
 
         if ($this->published_at->isYesterday()) {
@@ -81,5 +81,25 @@ class Article extends Model
         }
 
         return app(ThumbnailGenerator::class)->srcset($this->thumbnail);
+    }
+
+    /**
+     * Konten yang siap dirender ke halaman publik.
+     *
+     * Konten baru dari rich text editor sudah berupa HTML yang tersanitasi,
+     * sehingga bisa dirender langsung. Konten lama yang masih berupa plain
+     * text (dibuat sebelum ada rich editor) di-escape lalu diberi line break
+     * agar tetap tampil dengan benar.
+     */
+    public function getRenderedContentAttribute(): string
+    {
+        $content = $this->content ?? '';
+
+        // Konten lama (plain text) tidak mengandung tag HTML sama sekali
+        if ($content === strip_tags($content)) {
+            return nl2br(e($content));
+        }
+
+        return $content;
     }
 }

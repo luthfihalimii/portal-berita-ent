@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::post('articles/upload-image', [ArticleController::class, 'uploadImage'])->name('articles.upload-image');
         Route::resource('articles', ArticleController::class)->except(['show']);
     });
 });

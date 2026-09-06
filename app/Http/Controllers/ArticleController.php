@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Category;
 use App\Services\ThumbnailGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Mews\Purifier\Facades\Purifier;
 
 class ArticleController extends Controller
 {
@@ -69,6 +71,8 @@ class ArticleController extends Controller
             'status' => ['required', 'in:draft,published'],
         ]);
 
+        $validated['content'] = Purifier::clean($validated['content'], 'article');
+
         if ($request->hasFile('thumbnail')) {
             $validated['thumbnail'] = app(ThumbnailGenerator::class)->store($request->file('thumbnail'));
         }
@@ -113,6 +117,9 @@ class ArticleController extends Controller
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'status' => ['required', 'in:draft,published'],
         ]);
+
+        $validated['content'] = Purifier::clean($validated['content'], 'article');
+
         if ($request->hasFile('thumbnail')) {
             if ($article->thumbnail) {
                 app(ThumbnailGenerator::class)->delete($article->thumbnail);
@@ -146,5 +153,24 @@ class ArticleController extends Controller
         $article->delete();
 
         return redirect()->route('admin.articles.index')->with('success', 'Berita berhasil dihapus.');
+    }
+
+    /**
+     * Handle image upload dari Trix rich text editor.
+     *
+     * Menyimpan gambar ke disk public dan mengembalikan URL-nya
+     * agar bisa disematkan ke dalam konten artikel.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+        ]);
+
+        $path = $request->file('image')->store('article-images', 'public');
+
+        return response()->json([
+            'url' => Storage::disk('public')->url($path),
+        ]);
     }
 }

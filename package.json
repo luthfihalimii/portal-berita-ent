@@ -15,5 +15,8 @@
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.3"
+    },
+    "dependencies": {
+        "trix": "^2.1.19"
     }
 }

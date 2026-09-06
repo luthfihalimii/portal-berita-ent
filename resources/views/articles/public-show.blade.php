@@ -100,8 +100,8 @@
     </div>
 
     <!-- Konten Berita -->
-    <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed space-y-4 pt-4 border-t border-gray-100">
-        {!! nl2br(e($article->content)) !!}
+    <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed space-y-4 pt-4 border-t border-gray-100 article-content">
+        {!! $article->rendered_content !!}
     </div>
 
     <!-- Related Articles -->
