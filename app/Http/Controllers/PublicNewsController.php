@@ -91,13 +91,15 @@ class PublicNewsController extends Controller
             ->take(3)
             ->get();
 
+        $categories = Category::orderBy('name')->get();
+
         // SEO meta untuk halaman detail artikel
         $title = $article->title . ' - HalimiNews';
         $metaDescription = $article->excerpt;
         $ogType = 'article';
         $ogImage = $article->thumbnail ? asset('storage/' . $article->thumbnail) : null;
 
-        return view('articles.public-show', compact('article', 'relatedArticles', 'title', 'metaDescription', 'ogType', 'ogImage'));
+        return view('articles.public-show', compact('article', 'relatedArticles', 'categories', 'title', 'metaDescription', 'ogType', 'ogImage'));
     }
 
     /**
