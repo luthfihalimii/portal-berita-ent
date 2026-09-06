@@ -208,6 +208,24 @@ class SeoImprovementTest extends TestCase
         $this->assertTrue(Cache::has(Category::CACHE_KEY));
     }
 
+    public function test_category_cached_returns_usable_models_after_cache_hit(): void
+    {
+        Category::clearCache();
+
+        // Isi cache, lalu ambil lagi (cache hit) — hasilnya harus model yang
+        // bisa dipakai (bukan incomplete object dari unserialize yang gagal).
+        Category::cached();
+        $categories = Category::cached();
+
+        $first = $categories->first();
+
+        $this->assertInstanceOf(Category::class, $first);
+        $this->assertSame('Teknologi', $first->name);
+        $this->assertSame('teknologi', $first->slug);
+        // Relasi harus tetap bisa diakses
+        $this->assertNotNull($first->articles());
+    }
+
     public function test_category_cache_is_cleared_on_save(): void
     {
         Category::cached(); // isi cache

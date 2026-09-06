@@ -27,13 +27,23 @@ class Category extends Model
      * Kategori jarang berubah, jadi aman di-cache untuk mengurangi query
      * berulang di setiap halaman publik.
      *
+     * Data disimpan sebagai array (bukan objek Eloquent) agar aman
+     * di-serialize oleh semua cache driver (file/database/redis), lalu
+     * dihidrasikan kembali menjadi koleksi model saat diambil.
+     *
      * @return Collection<int, static>
      */
     public static function cached()
     {
-        return Cache::rememberForever(self::CACHE_KEY, function () {
-            return static::orderBy('name')->get();
+        $attributes = Cache::rememberForever(self::CACHE_KEY, function () {
+            return static::orderBy('name')->get()
+                ->map(fn (self $category) => $category->getAttributes())
+                ->all();
         });
+
+        return Collection::make($attributes)->map(
+            fn (array $attrs) => (new static)->newFromBuilder($attrs)
+        );
     }
 
     /**
