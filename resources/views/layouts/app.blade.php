@@ -191,6 +191,15 @@
         </div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <button type="button" id="back-to-top"
+            class="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-black text-white shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center opacity-0 translate-y-4 pointer-events-none"
+            aria-label="Kembali ke atas">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+
     <!-- Interactive Navigation Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -229,6 +238,28 @@
                 if (e.key === 'Escape' && isSearchOpen()) {
                     closeSearch();
                 }
+            });
+
+            // Back to Top
+            const backToTop = document.getElementById('back-to-top');
+            const VISIBLE_CLASSES = ['opacity-100', 'translate-y-0', 'pointer-events-auto'];
+            const HIDDEN_CLASSES = ['opacity-0', 'translate-y-4', 'pointer-events-none'];
+
+            function updateBackToTop() {
+                if (window.scrollY > 600) {
+                    backToTop.classList.remove(...HIDDEN_CLASSES);
+                    backToTop.classList.add(...VISIBLE_CLASSES);
+                } else {
+                    backToTop.classList.remove(...VISIBLE_CLASSES);
+                    backToTop.classList.add(...HIDDEN_CLASSES);
+                }
+            }
+
+            window.addEventListener('scroll', updateBackToTop, { passive: true });
+            updateBackToTop();
+
+            backToTop?.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
     </script>

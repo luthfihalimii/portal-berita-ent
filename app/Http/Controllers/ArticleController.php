@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\ThumbnailGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -69,7 +70,7 @@ class ArticleController extends Controller
         ]);
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            $validated['thumbnail'] = app(ThumbnailGenerator::class)->store($request->file('thumbnail'));
         }
 
         if ($validated['status'] === 'published') {
@@ -112,12 +113,12 @@ class ArticleController extends Controller
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'status' => ['required', 'in:draft,published'],
         ]);
-
         if ($request->hasFile('thumbnail')) {
-            if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
-                Storage::disk('public')->delete($article->thumbnail);
+            if ($article->thumbnail) {
+                app(ThumbnailGenerator::class)->delete($article->thumbnail);
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+
+            $validated['thumbnail'] = app(ThumbnailGenerator::class)->store($request->file('thumbnail'));
         }
 
         if ($validated['status'] === 'published') {
@@ -138,8 +139,8 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article): RedirectResponse
     {
-        if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
-            Storage::disk('public')->delete($article->thumbnail);
+        if ($article->thumbnail) {
+            app(ThumbnailGenerator::class)->delete($article->thumbnail);
         }
 
         $article->delete();

@@ -49,8 +49,8 @@ class PublicNewsController extends Controller
             ->whereNotIn('id', $excludedIds)
             ->orderBy('published_at', $sortDirection)
             ->orderBy('id', $sortDirection)
-            ->take(6)
-            ->get();
+            ->paginate(6)
+            ->withQueryString();
 
         // Kept for backward compatibility with current home.blade.php until Task 6
         $latestArticles = $secondaryArticles;

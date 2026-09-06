@@ -69,6 +69,8 @@
                             <img src="{{ asset('storage/' . $featuredArticle->thumbnail) }}" 
                                  alt="{{ $featuredArticle->title }}" 
                                  loading="eager"
+                                 srcset="{{ $featuredArticle->thumbnail_srcset }}"
+                                 sizes="(min-width: 1024px) 66vw, 100vw"
                                  class="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out">
                             <!-- Gradient overlay untuk kedalaman visual -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none"></div>
@@ -137,6 +139,8 @@
                                         <img src="{{ asset('storage/' . $secondary->thumbnail) }}" 
                                              alt="{{ $secondary->title }}" 
                                              loading="lazy"
+                                             srcset="{{ $secondary->thumbnail_srcset }}"
+                                             sizes="(min-width: 640px) 160px, 128px"
                                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
                                         <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-2 text-center">
@@ -184,7 +188,7 @@
 
     <!-- Additional News Section ($moreArticles) -->
     @if ($moreArticles->isNotEmpty())
-        <section class="pt-8 border-t border-gray-200 space-y-6">
+        <section class="pt-8 border-t border-gray-200 space-y-6" id="more-articles">
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl sm:text-3xl font-black text-black tracking-tight">
                     Berita Terkini Lainnya
@@ -204,6 +208,8 @@
                                 <img src="{{ asset('storage/' . $article->thumbnail) }}" 
                                      alt="{{ $article->title }}" 
                                      loading="lazy"
+                                     srcset="{{ $article->thumbnail_srcset }}"
+                                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                      class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-4 text-center">
@@ -256,6 +262,13 @@
                     </article>
                 @endforeach
             </div>
+
+            <!-- Pagination More Articles -->
+            @if ($moreArticles->hasPages())
+                <div class="pt-8 border-t border-gray-100">
+                    {{ $moreArticles->links() }}
+                </div>
+            @endif
         </section>
     @endif
 

@@ -4,8 +4,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <!-- Header -->
     <div class="border-b border-gray-200 pb-5">
-        <h1 class="text-3xl font-extrabold text-gray-900">Semua Berita</h1>
-        <p class="text-sm text-gray-600 mt-1">Kumpulan artikel berita terkini dan terpercaya</p>
+        <h1 class="text-3xl font-black text-gray-900 tracking-tight">Semua Berita</h1>
+        <p class="text-sm text-gray-500 mt-1">Kumpulan artikel berita terkini dan terpercaya</p>
     </div>
 
     <!-- Category Filter Bar -->
@@ -15,7 +15,7 @@
                 Semua
             </a>
             @foreach ($categories as $cat)
-                <a href="{{ route('news.category', $cat->slug) }}" class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-700 hover:border-blue-500 hover:text-blue-600 shrink-0 transition">
+                <a href="{{ route('news.category', $cat->slug) }}" class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-700 hover:border-black hover:text-black shrink-0 transition">
                     {{ $cat->name }}
                 </a>
             @endforeach
@@ -26,27 +26,30 @@
     @if ($articles->isNotEmpty())
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach ($articles as $article)
-                <article class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
-                    <a href="{{ route('news.show', $article->slug) }}" class="block aspect-video bg-gray-100 overflow-hidden relative group">
+                <article class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col group">
+                    <a href="{{ route('news.show', $article->slug) }}" class="block aspect-video bg-gray-100 overflow-hidden relative">
                         @if ($article->thumbnail)
                             <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                 loading="lazy"
+                                 srcset="{{ $article->thumbnail_srcset }}"
+                                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         @else
-                            <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs font-semibold">
-                                CRUDBerita
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-4 text-center">
+                                <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">HalimiNews</span>
                             </div>
                         @endif
-                        <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-white/90 text-gray-800 backdrop-blur-sm shadow-sm">
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[11px] font-bold bg-white/95 text-black shadow-sm">
                             {{ $article->category->name }}
                         </span>
                     </a>
 
                     <div class="p-5 flex-grow flex flex-col justify-between space-y-3">
                         <div>
-                            <p class="text-xs text-gray-400 mb-1">
-                                {{ $article->published_at ? $article->published_at->format('d M Y, H:i') : '' }}
+                            <p class="text-xs text-gray-400 font-medium mb-1.5">
+                                {{ $article->published_for_humans }}
                             </p>
-                            <h2 class="text-lg font-bold text-gray-900 leading-snug hover:text-blue-600 transition">
+                            <h2 class="text-lg font-bold text-gray-900 leading-snug group-hover:text-gray-600 transition line-clamp-2">
                                 <a href="{{ route('news.show', $article->slug) }}">
                                     {{ $article->title }}
                                 </a>
@@ -57,7 +60,7 @@
                         </div>
 
                         <div class="pt-3 border-t border-gray-100">
-                            <a href="{{ route('news.show', $article->slug) }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                            <a href="{{ route('news.show', $article->slug) }}" class="text-xs font-bold text-black hover:underline underline-offset-4">
                                 Baca Selengkapnya &rarr;
                             </a>
                         </div>

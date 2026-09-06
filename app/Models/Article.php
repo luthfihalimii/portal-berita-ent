@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ThumbnailGenerator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,5 +68,18 @@ class Article extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Atribut srcset responsive untuk tag <img> thumbnail.
+     * Mengembalikan string kosong jika tidak ada thumbnail.
+     */
+    public function getThumbnailSrcsetAttribute(): string
+    {
+        if (! $this->thumbnail) {
+            return '';
+        }
+
+        return app(ThumbnailGenerator::class)->srcset($this->thumbnail);
     }
 }
