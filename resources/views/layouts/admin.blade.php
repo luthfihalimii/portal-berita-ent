@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ $title ?? 'Admin Dashboard - CRUDBerita' }}</title>
+    {{ \Illuminate\Support\Facades\Vite::fonts() }}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen flex flex-col">

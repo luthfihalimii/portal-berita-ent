@@ -36,7 +36,32 @@ class Article extends Model
 
     public function getAuthorNameAttribute(?string $value): string
     {
-        return filled($value) ? $value : 'Redaksi VERTONEWS';
+        return filled($value) ? $value : 'Redaksi HalimiNews';
+    }
+
+    /**
+     * Format waktu publikasi yang ramah pembaca Indonesia.
+     * Contoh: "10:30, Hari ini", "Kemarin", "2 jam yang lalu", "05 Jan 2026".
+     */
+    public function getPublishedForHumansAttribute(): string
+    {
+        if (! $this->published_at) {
+            return '';
+        }
+
+        if ($this->published_at->isToday()) {
+            return $this->published_at->format('H:i') . ', Hari ini';
+        }
+
+        if ($this->published_at->isYesterday()) {
+            return 'Kemarin';
+        }
+
+        if ($this->published_at->greaterThanOrEqualTo(now()->subDays(7))) {
+            return $this->published_at->diffForHumans();
+        }
+
+        return $this->published_at->format('d M Y');
     }
 
     public function category(): BelongsTo

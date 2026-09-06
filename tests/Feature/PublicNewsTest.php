@@ -234,12 +234,12 @@ class PublicNewsTest extends TestCase
         $response->assertViewHas('moreArticles');
     }
 
-    public function test_main_layout_renders_vertonews_brand_search_and_guest_avatar(): void
+    public function test_main_layout_renders_haliminews_brand_search_and_guest_avatar(): void
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('VERTONEWS');
+        $response->assertSee('HalimiNews');
         $response->assertSee(route('news.search'));
         $response->assertSee('name="q"', false);
         $response->assertSee('https://x.com');
@@ -252,8 +252,8 @@ class PublicNewsTest extends TestCase
     public function test_main_layout_renders_admin_dashboard_avatar_when_authenticated(): void
     {
         $user = User::create([
-            'name' => 'Editor VERTONEWS',
-            'email' => 'editor@vertonews.com',
+            'name' => 'Editor HalimiNews',
+            'email' => 'editor@haliminews.com',
             'password' => Hash::make('password123'),
         ]);
 
@@ -261,7 +261,7 @@ class PublicNewsTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee(route('admin.dashboard'));
-        $response->assertSee('Dashboard Admin (Editor VERTONEWS)');
+        $response->assertSee('Dashboard Admin (Editor HalimiNews)');
     }
 
     public function test_homepage_redesign_renders_category_nav_hero_and_more_articles(): void

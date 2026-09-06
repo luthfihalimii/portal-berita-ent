@@ -4,7 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ $title ?? 'VERTONEWS - Portal Berita Terkini & Terpercaya' }}</title>
+    <title>{{ $title ?? 'HalimiNews - Portal Berita Terkini & Terpercaya' }}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+
+    <!-- SEO Meta -->
+    <meta name="description" content="{{ $metaDescription ?? 'HalimiNews - Portal berita terkini, terpercaya, dan aktual. Baca berita terbaru seputar politik, ekonomi, teknologi, olahraga, dan lainnya.' }}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:site_name" content="HalimiNews">
+    <meta property="og:title" content="{{ $title ?? 'HalimiNews - Portal Berita Terkini & Terpercaya' }}">
+    <meta property="og:description" content="{{ $metaDescription ?? 'Portal berita terkini, terpercaya, dan aktual.' }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('og-image.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $title ?? 'HalimiNews - Portal Berita Terkini & Terpercaya' }}">
+    <meta name="twitter:description" content="{{ $metaDescription ?? 'Portal berita terkini, terpercaya, dan aktual.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('og-image.png') }}">
+
+    {{ \Illuminate\Support\Facades\Vite::fonts() }}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen font-sans antialiased">
@@ -29,7 +52,7 @@
                 <div class="flex-1 text-center px-2">
                     <a href="{{ route('home') }}" 
                        class="font-extrabold tracking-[0.18em] text-xl sm:text-2xl uppercase text-black hover:opacity-80 transition inline-block">
-                        VERTONEWS
+                        HalimiNews
                     </a>
                 </div>
 
@@ -84,8 +107,9 @@
         </div>
 
         <!-- Search Overlay / Slide-down -->
-        <div id="search-slide-down" class="hidden border-t border-gray-200 bg-white shadow-sm transition-all duration-200">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div id="search-slide-down" class="grid grid-rows-[0fr] opacity-0 -translate-y-1 transition-[grid-template-rows,opacity,transform] duration-300 ease-out overflow-hidden border-t border-transparent">
+            <div class="min-h-0">
+                <div id="search-slide-inner" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-white border-t border-gray-200 shadow-sm -mt-px">
                 <form action="{{ route('news.search') }}" method="GET" class="relative flex items-center">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,6 +138,7 @@
                         </button>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
 
@@ -130,7 +155,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="text-center md:text-left">
                     <a href="{{ route('home') }}" class="font-extrabold tracking-[0.18em] text-lg uppercase text-black hover:opacity-80 transition inline-block">
-                        VERTONEWS
+                        HalimiNews
                     </a>
                     <p class="text-xs text-gray-500 mt-1">Portal berita terkini, terpercaya, dan aktual.</p>
                 </div>
@@ -160,7 +185,7 @@
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 space-y-2 sm:space-y-0">
-                <p>&copy; {{ date('Y') }} VERTONEWS. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} HalimiNews. All rights reserved.</p>
                 <p>Built with Laravel &amp; Tailwind CSS</p>
             </div>
         </div>
@@ -174,23 +199,35 @@
             const searchSlideDown = document.getElementById('search-slide-down');
             const searchInput = document.getElementById('search-input');
 
+            const OPEN_CLASSES = ['grid-rows-[1fr]', 'opacity-100', 'translate-y-0', 'border-gray-200'];
+            const CLOSED_CLASSES = ['grid-rows-[0fr]', 'opacity-0', '-translate-y-1', 'border-transparent'];
+
+            function openSearch() {
+                searchSlideDown.classList.remove(...CLOSED_CLASSES);
+                searchSlideDown.classList.add(...OPEN_CLASSES);
+                setTimeout(() => searchInput?.focus(), 250);
+            }
+
+            function closeSearch() {
+                searchSlideDown.classList.remove(...OPEN_CLASSES);
+                searchSlideDown.classList.add(...CLOSED_CLASSES);
+            }
+
+            function isSearchOpen() {
+                return searchSlideDown.classList.contains('opacity-100');
+            }
+
             function toggleSearch() {
-                const isHidden = searchSlideDown.classList.contains('hidden');
-                if (isHidden) {
-                    searchSlideDown.classList.remove('hidden');
-                    setTimeout(() => searchInput?.focus(), 50);
-                } else {
-                    searchSlideDown.classList.add('hidden');
-                }
+                isSearchOpen() ? closeSearch() : openSearch();
             }
 
             searchToggleBtn?.addEventListener('click', toggleSearch);
-            searchCloseBtn?.addEventListener('click', toggleSearch);
+            searchCloseBtn?.addEventListener('click', closeSearch);
 
             // Close on Escape key press
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && !searchSlideDown.classList.contains('hidden')) {
-                    searchSlideDown.classList.add('hidden');
+                if (e.key === 'Escape' && isSearchOpen()) {
+                    closeSearch();
                 }
             });
         });

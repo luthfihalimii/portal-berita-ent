@@ -98,7 +98,7 @@ class DatabaseSeeder extends Seeder
                 'category_id' => $kategoriTeknologi->id,
                 'title' => 'Draft Rencana Peluncuran Satelit Komunikasi Generasi Ketiga',
                 'slug' => 'draft-rencana-peluncuran-satelit-komunikasi-generasi-ketiga',
-                'author_name' => 'Redaksi VERTONEWS',
+                'author_name' => 'Redaksi HalimiNews',
                 'excerpt' => 'Artikel ini masih berstatus draft dan berisi data awal perencanaan peluncuran satelit.',
                 'content' => 'Dokumen ini masih dalam penyusunan internal redaksi dan tidak boleh tampil di halaman pengunjung umum.',
                 'status' => 'draft',

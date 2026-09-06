@@ -151,6 +151,6 @@ class ArticleModelTest extends TestCase
             'status' => 'published',
         ]);
 
-        $this->assertEquals('Redaksi VERTONEWS', $articleWithoutAuthor->author_name);
+        $this->assertEquals('Redaksi HalimiNews', $articleWithoutAuthor->author_name);
     }
 }

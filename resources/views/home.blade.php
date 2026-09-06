@@ -3,19 +3,34 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10 sm:space-y-12">
     <!-- Category Navigation Bar -->
-    <div class="border-b border-gray-200">
-        <nav class="flex items-center space-x-6 sm:space-x-8 overflow-x-auto scroll-smooth scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mb-px text-xs sm:text-sm font-medium" aria-label="Kategori Berita">
+    <div class="border-b border-gray-200 relative">
+        <nav class="flex items-center space-x-6 sm:space-x-8 overflow-x-auto scroll-smooth scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mb-px text-xs sm:text-sm font-medium [mask-image:linear-gradient(to_right,black_85%,transparent)] sm:[mask-image:none]" aria-label="Kategori Berita">
             <a href="{{ route('home') }}" 
-               class="pb-3 border-b-2 border-black font-semibold text-black whitespace-nowrap transition">
+               @class([
+                   'pb-3 border-b-2 whitespace-nowrap transition',
+                   'border-black font-semibold text-black' => request()->routeIs('home'),
+                   'border-transparent text-gray-500 hover:text-black hover:border-gray-300' => ! request()->routeIs('home'),
+               ])
+               @if (request()->routeIs('home')) aria-current="page" @endif>
                 Home
             </a>
             <a href="{{ route('news.index') }}" 
-               class="pb-3 border-b-2 border-transparent text-gray-500 hover:text-black hover:border-gray-300 transition whitespace-nowrap">
+               @class([
+                   'pb-3 border-b-2 whitespace-nowrap transition',
+                   'border-black font-semibold text-black' => request()->routeIs('news.index'),
+                   'border-transparent text-gray-500 hover:text-black hover:border-gray-300' => ! request()->routeIs('news.index'),
+               ])
+               @if (request()->routeIs('news.index')) aria-current="page" @endif>
                 Semua Berita
             </a>
             @foreach ($categories as $category)
                 <a href="{{ route('news.category', $category->slug) }}" 
-                   class="pb-3 border-b-2 border-transparent text-gray-500 hover:text-black hover:border-gray-300 transition whitespace-nowrap">
+                   @class([
+                       'pb-3 border-b-2 whitespace-nowrap transition',
+                       'border-black font-semibold text-black' => request()->routeIs('news.category') && request()->route('slug') === $category->slug,
+                       'border-transparent text-gray-500 hover:text-black hover:border-gray-300' => ! (request()->routeIs('news.category') && request()->route('slug') === $category->slug),
+                   ])
+                   @if (request()->routeIs('news.category') && request()->route('slug') === $category->slug) aria-current="page" @endif>
                     {{ $category->name }}
                 </a>
             @endforeach
@@ -43,20 +58,23 @@
 
     <!-- Hero Section (2-Column Magazine Layout) -->
     @if ($featuredArticle)
-        <section class="grid grid-cols-1 {{ $secondaryArticles->isNotEmpty() ? 'lg:grid-cols-12' : '' }} gap-8 lg:gap-10 items-start pt-4">
+        <section class="grid grid-cols-1 {{ $secondaryArticles->isNotEmpty() ? 'lg:grid-cols-12' : '' }} gap-8 lg:gap-12 items-start pt-4">
             <!-- Left Column (Featured Article) -->
-            <div class="{{ $secondaryArticles->isNotEmpty() ? 'lg:col-span-7 xl:col-span-7' : 'max-w-4xl' }}">
+            <div class="{{ $secondaryArticles->isNotEmpty() ? 'lg:col-span-8' : 'max-w-5xl' }}">
                 <article>
                     <!-- Media Image -->
                     <a href="{{ route('news.show', $featuredArticle->slug) }}" 
-                       class="block rounded-2xl sm:rounded-3xl overflow-hidden aspect-[16/10] bg-gray-100 relative group shadow-sm">
+                       class="block rounded-2xl sm:rounded-3xl overflow-hidden aspect-[16/9] bg-gray-100 relative group shadow-md hover:shadow-xl transition-shadow duration-300">
                         @if ($featuredArticle->thumbnail)
                             <img src="{{ asset('storage/' . $featuredArticle->thumbnail) }}" 
                                  alt="{{ $featuredArticle->title }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out">
+                                 loading="eager"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out">
+                            <!-- Gradient overlay untuk kedalaman visual -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none"></div>
                         @else
                             <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-neutral-900 to-black text-white p-6 sm:p-10 text-center">
-                                <span class="text-[11px] font-extrabold uppercase tracking-[0.25em] text-gray-400 mb-2">VERTONEWS EDITORIAL</span>
+                                <span class="text-[11px] font-extrabold uppercase tracking-[0.25em] text-gray-400 mb-2">HalimiNews EDITORIAL</span>
                                 <span class="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white/90 line-clamp-2">
                                     {{ $featuredArticle->title }}
                                 </span>
@@ -65,48 +83,42 @@
                     </a>
 
                     <!-- Meta Row under image -->
-                    <div class="flex items-center mt-4 text-xs">
+                    <div class="flex items-center mt-5 text-sm">
                         @php
                             $fWords = explode(' ', trim($featuredArticle->author_name));
                             $fInitials = count($fWords) >= 2 
                                 ? strtoupper(substr($fWords[0], 0, 1) . substr($fWords[1], 0, 1))
                                 : strtoupper(substr($featuredArticle->author_name, 0, 2));
                         @endphp
-                        <div class="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0" title="{{ $featuredArticle->author_name }}">
+                        <div class="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs shrink-0" title="{{ $featuredArticle->author_name }}">
                             {{ $fInitials }}
                         </div>
-                        <span class="font-semibold text-gray-900 text-xs ml-2">{{ $featuredArticle->author_name }}</span>
-                        <span class="text-gray-300 mx-2">|</span>
+                        <span class="font-semibold text-gray-900 text-sm ml-2.5">{{ $featuredArticle->author_name }}</span>
+                        <span class="text-gray-300 mx-3">|</span>
                         <a href="{{ route('news.category', $featuredArticle->category->slug) }}" 
-                           class="font-medium text-gray-600 hover:text-black text-xs transition">
+                           class="font-medium text-gray-500 hover:text-black text-sm transition">
                             {{ $featuredArticle->category->name }}
                         </a>
-                        <span class="ml-auto text-xs text-gray-400 font-medium shrink-0">
-                            @if ($featuredArticle->published_at)
-                                @if ($featuredArticle->published_at->isToday())
-                                    {{ $featuredArticle->published_at->format('H:i') }}, Today
-                                @else
-                                    {{ $featuredArticle->published_at->format('d M Y') }}
-                                @endif
-                            @endif
+                        <span class="ml-auto text-sm text-gray-400 font-medium shrink-0">
+                            {{ $featuredArticle->published_for_humans }}
                         </span>
                     </div>
 
                     <!-- Big bold headline -->
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-black tracking-tight leading-[1.18] mt-3 hover:text-gray-700 transition">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-black text-black tracking-tight leading-[1.12] mt-4 hover:text-gray-700 transition">
                         <a href="{{ route('news.show', $featuredArticle->slug) }}">
                             {{ $featuredArticle->title }}
                         </a>
-                    </h2>
+                    </h1>
 
                     <!-- Excerpt paragraph -->
-                    <p class="text-gray-600 text-sm sm:text-base leading-relaxed mt-3 line-clamp-3">
+                    <p class="text-gray-600 text-base sm:text-lg leading-relaxed mt-4 line-clamp-3">
                         {{ $featuredArticle->excerpt }}
                     </p>
 
                     <!-- read more link -->
                     <a href="{{ route('news.show', $featuredArticle->slug) }}" 
-                       class="inline-block text-xs sm:text-sm font-bold text-black hover:underline mt-2">
+                       class="inline-block text-sm sm:text-base font-bold text-black hover:underline underline-offset-4 mt-3">
                         read more &rarr;
                     </a>
                 </article>
@@ -114,26 +126,27 @@
 
             <!-- Right Column (Secondary Articles Stack) -->
             @if ($secondaryArticles->isNotEmpty())
-                <div class="lg:col-span-5 xl:col-span-5 space-y-6">
+                <div class="lg:col-span-4 space-y-8">
                     @foreach ($secondaryArticles as $secondary)
-                        <article class="border-b border-gray-100 pb-5 last:border-b-0 last:pb-0 space-y-3">
+                        <article class="border-b border-gray-200 pb-7 last:border-b-0 last:pb-0 space-y-4">
                             <!-- Top: Flex layout with thumbnail on the left and title on the right -->
-                            <div class="flex items-start gap-3.5 sm:gap-4">
+                            <div class="flex items-start gap-4">
                                 <a href="{{ route('news.show', $secondary->slug) }}" 
-                                   class="w-28 sm:w-36 aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 shrink-0 group relative block shadow-sm">
+                                   class="w-32 sm:w-40 aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 shrink-0 group relative block shadow-sm hover:shadow-md transition-shadow">
                                     @if ($secondary->thumbnail)
                                         <img src="{{ asset('storage/' . $secondary->thumbnail) }}" 
                                              alt="{{ $secondary->title }}" 
-                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                             loading="lazy"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
                                         <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-2 text-center">
-                                            <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">VERTO</span>
+                                            <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">HALIMI</span>
                                         </div>
                                     @endif
                                 </a>
 
                                 <div class="flex-1 min-w-0 pt-0.5">
-                                    <h3 class="font-bold text-black text-sm sm:text-base leading-snug line-clamp-2 hover:text-gray-700 transition">
+                                    <h3 class="font-bold text-black text-base sm:text-lg leading-snug line-clamp-3 hover:text-gray-700 transition">
                                         <a href="{{ route('news.show', $secondary->slug) }}">
                                             {{ $secondary->title }}
                                         </a>
@@ -142,30 +155,24 @@
                             </div>
 
                             <!-- Meta Row below: Author avatar circle, author name, divider |, category link, and right-aligned time -->
-                            <div class="flex items-center text-xs">
+                            <div class="flex items-center text-sm">
                                 @php
                                     $sWords = explode(' ', trim($secondary->author_name));
                                     $sInitials = count($sWords) >= 2 
                                         ? strtoupper(substr($sWords[0], 0, 1) . substr($sWords[1], 0, 1))
                                         : strtoupper(substr($secondary->author_name, 0, 2));
                                 @endphp
-                                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-[9px] sm:text-[10px] shrink-0" title="{{ $secondary->author_name }}">
+                                <div class="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0" title="{{ $secondary->author_name }}">
                                     {{ $sInitials }}
                                 </div>
-                                <span class="font-semibold text-gray-900 text-xs ml-2 truncate max-w-[100px] sm:max-w-[140px]">{{ $secondary->author_name }}</span>
-                                <span class="text-gray-300 mx-2">|</span>
+                                <span class="font-semibold text-gray-900 text-sm ml-2 truncate max-w-[100px] sm:max-w-[140px]">{{ $secondary->author_name }}</span>
+                                <span class="text-gray-300 mx-2.5">|</span>
                                 <a href="{{ route('news.category', $secondary->category->slug) }}" 
-                                   class="font-medium text-gray-600 hover:text-black text-xs transition truncate max-w-[90px] sm:max-w-[120px]">
+                                   class="font-medium text-gray-500 hover:text-black text-sm transition truncate max-w-[90px] sm:max-w-[120px]">
                                     {{ $secondary->category->name }}
                                 </a>
-                                <span class="ml-auto text-xs text-gray-400 font-medium shrink-0">
-                                    @if ($secondary->published_at)
-                                        @if ($secondary->published_at->isToday())
-                                            {{ $secondary->published_at->format('H:i') }}, Today
-                                        @else
-                                            {{ $secondary->published_at->format('d M Y') }}
-                                        @endif
-                                    @endif
+                                <span class="ml-auto text-sm text-gray-400 font-medium shrink-0">
+                                    {{ $secondary->published_for_humans }}
                                 </span>
                             </div>
                         </article>
@@ -179,10 +186,10 @@
     @if ($moreArticles->isNotEmpty())
         <section class="pt-8 border-t border-gray-200 space-y-6">
             <div class="flex items-center justify-between">
-                <h2 class="text-xl sm:text-2xl font-extrabold text-black tracking-tight">
+                <h2 class="text-2xl sm:text-3xl font-black text-black tracking-tight">
                     Berita Terkini Lainnya
                 </h2>
-                <a href="{{ route('news.index') }}" class="text-xs sm:text-sm font-bold text-black hover:underline flex items-center space-x-1">
+                <a href="{{ route('news.index') }}" class="text-sm sm:text-base font-bold text-black hover:underline underline-offset-4 flex items-center space-x-1.5">
                     <span>Lihat Semua Berita</span>
                     <span>&rarr;</span>
                 </a>
@@ -196,10 +203,11 @@
                             @if ($article->thumbnail)
                                 <img src="{{ asset('storage/' . $article->thumbnail) }}" 
                                      alt="{{ $article->title }}" 
-                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                     loading="lazy"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-4 text-center">
-                                    <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">VERTONEWS</span>
+                                    <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">HalimiNews</span>
                                 </div>
                             @endif
                             <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[11px] font-bold bg-white/95 text-black shadow-sm">
@@ -224,7 +232,7 @@
                                     <span class="font-semibold text-gray-900 text-xs ml-2 truncate max-w-[120px]">{{ $article->author_name }}</span>
                                     <span class="text-gray-300 mx-2">|</span>
                                     <span class="text-gray-400 font-medium text-xs ml-auto shrink-0">
-                                        {{ $article->published_at ? $article->published_at->format('d M Y') : '' }}
+                                        {{ $article->published_for_humans }}
                                     </span>
                                 </div>
 
