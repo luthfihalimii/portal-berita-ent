@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleSlugRedirect;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class PublicNewsController extends Controller
 {
@@ -68,20 +70,40 @@ class PublicNewsController extends Controller
             ->latest('published_at')
             ->paginate(9);
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::cached();
 
         return view('articles.public-index', compact('articles', 'categories'));
     }
 
     /**
      * Display the specified published article.
+     *
+     * Jika slug tidak ditemukan, cek apakah ini slug lama yang sudah
+     * diganti — jika ya, redirect 301 (permanent) ke URL baru agar
+     * ranking SEO dan tautan eksternal tidak rusak.
      */
-    public function show(string $slug): View
+    public function show(string $slug): Response
     {
         $article = Article::with('category')
             ->where('slug', $slug)
             ->where('status', 'published')
-            ->firstOrFail();
+            ->first();
+
+        if (! $article) {
+            $redirect = ArticleSlugRedirect::where('old_slug', $slug)->first();
+
+            if ($redirect) {
+                $target = Article::where('id', $redirect->article_id)
+                    ->where('status', 'published')
+                    ->first();
+
+                if ($target) {
+                    return redirect()->route('news.show', $target->slug, 301);
+                }
+            }
+
+            abort(404);
+        }
 
         $relatedArticles = Article::with('category')
             ->where('status', 'published')
@@ -91,15 +113,22 @@ class PublicNewsController extends Controller
             ->take(3)
             ->get();
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::cached();
 
         // SEO meta untuk halaman detail artikel
-        $title = $article->title . ' - HalimiNews';
+        $title = $article->title.' - HalimiNews';
         $metaDescription = $article->excerpt;
         $ogType = 'article';
-        $ogImage = $article->thumbnail ? asset('storage/' . $article->thumbnail) : null;
+        $ogImage = $article->thumbnail ? asset('storage/'.$article->thumbnail) : null;
+        $canonicalUrl = route('news.show', $article->slug);
 
-        return view('articles.public-show', compact('article', 'relatedArticles', 'categories', 'title', 'metaDescription', 'ogType', 'ogImage'));
+        $view = view('articles.public-show', compact('article', 'relatedArticles', 'categories', 'title', 'metaDescription', 'ogType', 'ogImage', 'canonicalUrl'));
+
+        // ETag stabil berbasis updated_at + id artikel agar cache browser
+        // hanya invalid ketika artikel benar-benar berubah.
+        $etag = '"article-'.$article->id.'-'.$article->updated_at->timestamp.'"';
+
+        return response($view)->header('ETag', $etag);
     }
 
     /**
@@ -115,29 +144,47 @@ class PublicNewsController extends Controller
             ->latest('published_at')
             ->paginate(9);
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::cached();
 
         return view('articles.public-category', compact('category', 'articles', 'categories'));
     }
 
     /**
      * Search published articles by keyword.
+     *
+     * Mencari di judul, excerpt, dan konten, lalu mengurutkan berdasarkan
+     * relevansi: kecocokan di judul lebih diutamakan daripada excerpt,
+     * lalu konten. Hasil dengan relevansi sama diurutkan dari terbaru.
      */
     public function search(Request $request): View
     {
-        $keyword = $request->input('q', '');
+        $keyword = trim($request->input('q', ''));
 
         $articles = Article::with('category')
             ->where('status', 'published')
-            ->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', '%'.$keyword.'%')
-                    ->orWhere('excerpt', 'like', '%'.$keyword.'%');
+            ->when($keyword !== '', function ($query) use ($keyword) {
+                $like = '%'.$keyword.'%';
+
+                $query->where(function ($q) use ($like) {
+                    $q->where('title', 'like', $like)
+                        ->orWhere('excerpt', 'like', $like)
+                        ->orWhere('content', 'like', $like);
+                })
+                // Skor relevansi: judul=3, excerpt=2, konten=1
+                    ->orderByRaw(
+                        '(CASE
+                        WHEN title LIKE ? THEN 3
+                        WHEN excerpt LIKE ? THEN 2
+                        ELSE 1
+                    END) DESC',
+                        [$like, $like]
+                    );
             })
             ->latest('published_at')
             ->paginate(9)
             ->withQueryString();
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::cached();
 
         return view('articles.public-search', compact('articles', 'keyword', 'categories'));
     }

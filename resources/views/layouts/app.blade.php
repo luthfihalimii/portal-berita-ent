@@ -16,6 +16,11 @@
     <!-- RSS Feed -->
     <link rel="alternate" type="application/rss+xml" title="HalimiNews RSS Feed" href="{{ route('feed') }}">
 
+    <!-- Canonical URL -->
+    @if (isset($canonicalUrl))
+        <link rel="canonical" href="{{ $canonicalUrl }}">
+    @endif
+
     <!-- Open Graph -->
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:site_name" content="HalimiNews">

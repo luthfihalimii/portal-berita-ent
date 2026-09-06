@@ -11,9 +11,14 @@ use Illuminate\Support\Facades\Route;
 // Public Portal Routes
 Route::get('/', [PublicNewsController::class, 'home'])->name('home');
 Route::get('/berita', [PublicNewsController::class, 'index'])->name('news.index');
-Route::get('/berita/{slug}', [PublicNewsController::class, 'show'])->name('news.show');
 Route::get('/berita/kategori/{slug}', [PublicNewsController::class, 'category'])->name('news.category');
 Route::get('/search', [PublicNewsController::class, 'search'])->name('news.search');
+
+// Halaman artikel jarang berubah — aman di-cache publik lebih lama (10 menit)
+Route::get('/berita/{slug}', [PublicNewsController::class, 'show'])
+    ->middleware('cache.public:600')
+    ->name('news.show');
+
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/feed', [SitemapController::class, 'feed'])->name('feed');

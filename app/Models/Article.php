@@ -6,6 +6,7 @@ use App\Services\ThumbnailGenerator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Article extends Model
 {
@@ -68,6 +69,40 @@ class Article extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function slugRedirects(): HasMany
+    {
+        return $this->hasMany(ArticleSlugRedirect::class);
+    }
+
+    /**
+     * Bangkitkan excerpt dari konten jika excerpt kosong.
+     *
+     * Mengambil teks polos konten (tanpa tag HTML), memangkasnya ke batas
+     * kata terdekat agar tidak terpotong di tengah kata.
+     */
+    public static function generateExcerpt(?string $excerpt, string $content, int $maxLength = 200): string
+    {
+        if (filled($excerpt)) {
+            return $excerpt;
+        }
+
+        $plain = trim(preg_replace('/\s+/', ' ', strip_tags($content)) ?? '');
+
+        if (mb_strlen($plain) <= $maxLength) {
+            return $plain;
+        }
+
+        $truncated = mb_substr($plain, 0, $maxLength);
+
+        // Potong di spasi terakhir agar tidak memotong kata
+        $lastSpace = mb_strrpos($truncated, ' ');
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($truncated, 0, $lastSpace);
+        }
+
+        return rtrim($truncated, ' .,;:!?').'…';
     }
 
     /**

@@ -113,7 +113,9 @@ class ArticleCrudTest extends TestCase
             ->post('/admin/articles', []);
 
         $response->assertRedirect('/admin/articles/create');
-        $response->assertSessionHasErrors(['title', 'excerpt', 'content', 'category_id', 'status']);
+        $response->assertSessionHasErrors(['title', 'content', 'category_id', 'status']);
+        // excerpt bersifat opsional sejak ada auto-generate dari konten
+        $response->assertSessionDoesntHaveErrors(['excerpt']);
     }
 
     public function test_admin_can_update_article_and_publish(): void

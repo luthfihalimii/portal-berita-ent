@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleSlugRedirect;
 use App\Models\Category;
 use App\Services\ArticleContentImages;
 use App\Services\ThumbnailGenerator;
@@ -66,7 +67,7 @@ class ArticleController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:articles,slug'],
             'author_name' => ['nullable', 'string', 'max:100'],
-            'excerpt' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string'],
             'content' => ['required', 'string'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'status' => ['required', 'in:draft,published'],
@@ -74,6 +75,9 @@ class ArticleController extends Controller
 
         $validated['content'] = Purifier::clean($validated['content'], 'article');
         $validated['content'] = app(ArticleContentImages::class)->addResponsiveAttributes($validated['content']);
+
+        // Auto-generate excerpt dari konten jika admin mengosongkannya
+        $validated['excerpt'] = Article::generateExcerpt($validated['excerpt'], $validated['content']);
 
         if ($request->hasFile('thumbnail')) {
             $validated['thumbnail'] = app(ThumbnailGenerator::class)->store($request->file('thumbnail'));
@@ -114,7 +118,7 @@ class ArticleController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('articles', 'slug')->ignore($article->id)],
             'author_name' => ['nullable', 'string', 'max:100'],
-            'excerpt' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string'],
             'content' => ['required', 'string'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'status' => ['required', 'in:draft,published'],
@@ -123,8 +127,12 @@ class ArticleController extends Controller
         $validated['content'] = Purifier::clean($validated['content'], 'article');
         $validated['content'] = app(ArticleContentImages::class)->addResponsiveAttributes($validated['content']);
 
+        // Auto-generate excerpt dari konten jika admin mengosongkannya
+        $validated['excerpt'] = Article::generateExcerpt($validated['excerpt'], $validated['content']);
+
         // Tangkap konten lama SEBELUM update untuk keperluan cleanup gambar inline
         $previousContent = $article->content;
+        $previousSlug = $article->slug;
 
         if ($request->hasFile('thumbnail')) {
             if ($article->thumbnail) {
@@ -143,6 +151,11 @@ class ArticleController extends Controller
         }
 
         $article->update($validated);
+
+        // Catat slug lama agar URL lama bisa di-redirect 301 ke slug baru
+        if ($previousSlug !== $article->slug) {
+            $this->recordSlugRedirect($article, $previousSlug);
+        }
 
         // Bersihkan gambar inline yang dihapus dari konten dan tidak dipakai artikel lain
         $this->cleanupOrphanedContentImages($article, $previousContent, $validated['content']);
@@ -212,5 +225,25 @@ class ArticleController extends Controller
 
         $keepPaths = $contentImages->pathsUsedByOtherArticles($article->id);
         $contentImages->deleteOrphans($removedPaths, $keepPaths);
+    }
+
+    /**
+     * Simpan slug lama ke tabel redirect agar URL lama bisa di-redirect.
+     *
+     * Jika slug baru saat ini tercatat sebagai slug lama milik artikel lain
+     * (reuse slug), catatan tersebut dipindahkan ke artikel ini.
+     */
+    protected function recordSlugRedirect(Article $article, string $oldSlug): void
+    {
+        // Hindari duplikasi jika slug lama sudah tercatat
+        ArticleSlugRedirect::updateOrCreate(
+            ['old_slug' => $oldSlug],
+            ['article_id' => $article->id]
+        );
+
+        // Jika slug baru sebelumnya tercatat sebagai redirect, hapus agar tidak loop
+        ArticleSlugRedirect::where('old_slug', $article->slug)
+            ->where('article_id', $article->id)
+            ->delete();
     }
 }
