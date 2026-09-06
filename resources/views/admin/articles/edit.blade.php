@@ -13,7 +13,7 @@
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
-        <form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data" class="space-y-6" data-autosave-form>
+        <form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
             @method('PUT')
 

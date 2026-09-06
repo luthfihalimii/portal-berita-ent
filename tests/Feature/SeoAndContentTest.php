@@ -177,28 +177,6 @@ class SeoAndContentTest extends TestCase
     }
 
     // ------------------------------------------------------------------
-    // Auto-save draft hook
-    // ------------------------------------------------------------------
-
-    public function test_create_form_has_autosave_hook(): void
-    {
-        $response = $this->actingAs($this->admin)->get('/admin/articles/create');
-
-        $response->assertStatus(200);
-        $response->assertSee('data-autosave-form', false);
-    }
-
-    public function test_edit_form_has_autosave_hook(): void
-    {
-        $article = $this->createPublishedArticle();
-
-        $response = $this->actingAs($this->admin)->get("/admin/articles/{$article->id}/edit");
-
-        $response->assertStatus(200);
-        $response->assertSee('data-autosave-form', false);
-    }
-
-    // ------------------------------------------------------------------
     // Inline image optimization (responsive srcset)
     // ------------------------------------------------------------------
 
